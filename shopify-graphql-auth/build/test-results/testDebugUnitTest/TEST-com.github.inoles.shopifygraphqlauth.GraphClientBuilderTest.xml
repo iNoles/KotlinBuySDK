@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.github.inoles.shopifygraphqlauth.GraphClientBuilderTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2025-03-29T03:08:44" hostname="Jonathans-iMac.local" time="0.192">
+  <properties/>
+  <testcase name="buildSuccessWithDefaultClient" classname="com.github.inoles.shopifygraphqlauth.GraphClientBuilderTest" time="0.191"/>
+  <testcase name="buildSuccessWithCustomOkHttpClient" classname="com.github.inoles.shopifygraphqlauth.GraphClientBuilderTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
