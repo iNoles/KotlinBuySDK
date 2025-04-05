@@ -10,7 +10,11 @@ A lightweight and Kotlin-first GraphQL client built specifically for Shopify's S
 
 ## Installation
 
-Coming soon via Maven Central
+Installation steps will be available soon via Maven Central. In the meantime, you can clone the repository and build the project locally.
+
+## Status
+
+This project is in active development. Features like rate limiting, retry strategy, and paging helpers are coming soon!
 
 ## Roadmap
 
