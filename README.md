@@ -1,4 +1,7 @@
 # Shopify GraphQL Kotlin Client
+
+![License](https://img.shields.io/github/license/iNoles/KotlinBuySDK)
+
 A lightweight and Kotlin-first GraphQL client built specifically for Shopify's Storefront APIs. This project reimagines Shopify's Mobile Buy SDK using idiomatic Kotlin, OkHttp, and kotlinx.serialization.
 
 ## Features
