@@ -36,16 +36,20 @@ class GraphClient private constructor(
 ) {
     private val json = Json { ignoreUnknownKeys = true }
 
-    private fun buildRequest(requestBody: RequestBody): Request {
-        return Request.Builder().apply {
-            url(serverUrl)
-            cacheControl(CacheControl.Builder().maxAge(1L.hours).build())
-            post(requestBody)
-        }.build()
-    }
+    private fun buildRequest(requestBody: RequestBody): Request =
+        Request
+            .Builder()
+            .apply {
+                url(serverUrl)
+                cacheControl(CacheControl.Builder().maxAge(1L.hours).build())
+                post(requestBody)
+            }.build()
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    suspend fun executeQuery(query: String, variables: Map<String, Any>? = null): JsonObject? {
+    suspend fun executeQuery(
+        query: String,
+        variables: Map<String, Any>? = null,
+    ): JsonObject? {
         val requestBody = createRequestBody(query, variables)
         val request = buildRequest(requestBody)
 
@@ -63,42 +67,53 @@ class GraphClient private constructor(
         return json.parseToJsonElement(response.body.string()).jsonObject
     }
 
-    private fun createRequestBody(query: String, variables: Map<String, Any>?): RequestBody {
+    private fun createRequestBody(
+        query: String,
+        variables: Map<String, Any>?,
+    ): RequestBody {
         val jsonPayload = buildJsonPayload(query, variables)
         return jsonPayload.toRequestBody("application/json".toMediaType())
     }
 
-    fun buildJsonPayload(query: String, variables: Map<String, Any>?): String {
+    fun buildJsonPayload(
+        query: String,
+        variables: Map<String, Any>?,
+    ): String {
         val queryJson = Json.encodeToJsonElement(String.serializer(), query)
 
-        val variablesJson = variables?.let {
-            // Convert the values to JsonElement manually
-            val serializedVariables = it.mapValues { entry ->
-                when (val value = entry.value) {
-                    is String -> JsonPrimitive(value)  // Handle String
-                    is Number -> JsonPrimitive(value)  // Handle Numbers
-                    is Boolean -> JsonPrimitive(value) // Handle Booleans
-                    is JsonElement -> value           // If it's already a JsonElement, just use it
-                    is Map<*, *> -> JsonObject(value.mapKeys { it.key.toString() }.mapValues { buildJsonElement(it.value) }) // Handle Map
-                    is List<*> -> JsonArray(value.map { buildJsonElement(it) }) // Handle List
-                    else -> JsonNull                   // Handle any unknown types as null
-                }
-            }
+        val variablesJson =
+            variables?.let {
+                // Convert the values to JsonElement manually
+                val serializedVariables =
+                    it.mapValues { entry ->
+                        when (val value = entry.value) {
+                            is String -> JsonPrimitive(value) // Handle String
+                            is Number -> JsonPrimitive(value) // Handle Numbers
+                            is Boolean -> JsonPrimitive(value) // Handle Booleans
+                            is JsonElement -> value // If it's already a JsonElement, just use it
+                            is Map<*, *> -> JsonObject(value.mapKeys { it.key.toString() }.mapValues { buildJsonElement(it.value) }) // Handle Map
+                            is List<*> -> JsonArray(value.map { buildJsonElement(it) }) // Handle List
+                            else -> JsonNull // Handle any unknown types as null
+                        }
+                    }
 
-            Json.encodeToJsonElement(MapSerializer(String.serializer(), JsonElement.serializer()), serializedVariables)
-        } ?: JsonObject(emptyMap())
+                Json.encodeToJsonElement(MapSerializer(String.serializer(), JsonElement.serializer()), serializedVariables)
+            } ?: JsonObject(emptyMap())
 
-        val jsonPayload = JsonObject(mapOf(
-            "query" to queryJson,
-            "variables" to variablesJson
-        ))
+        val jsonPayload =
+            JsonObject(
+                mapOf(
+                    "query" to queryJson,
+                    "variables" to variablesJson,
+                ),
+            )
 
         return jsonPayload.toString()
     }
 
     // Recursively build JsonElement for complex structures like List or Map
-    private fun buildJsonElement(value: Any?): JsonElement {
-        return when (value) {
+    private fun buildJsonElement(value: Any?): JsonElement =
+        when (value) {
             is String -> JsonPrimitive(value)
             is Number -> JsonPrimitive(value)
             is Boolean -> JsonPrimitive(value)
@@ -106,7 +121,6 @@ class GraphClient private constructor(
             is List<*> -> JsonArray(value.map { buildJsonElement(it) })
             else -> JsonNull
         }
-    }
 
     class Builder(
         private var shopDomain: String,
@@ -123,27 +137,35 @@ class GraphClient private constructor(
         }
 
         fun shopDomain(shopUrl: String) = apply { this.shopDomain = shopUrl }
+
         fun accessToken(accessToken: String) = apply { this.accessToken = accessToken }
+
         fun apiVersion(apiVersion: String) = apply { this.apiVersion = apiVersion }
+
         fun cacheDir(cacheDir: File) = apply { this.cacheDir = cacheDir }
+
         fun httpClient(httpClient: OkHttpClient) = apply { this.httpClient = httpClient }
+
         fun maxRetries(maxRetries: Int) = apply { this.maxRetries = maxRetries }
 
-        fun defaultOkHttpClient(): OkHttpClient {
-            return OkHttpClient.Builder().apply {
-                cacheDir?.let { cache(Cache(it, 10L * 1024 * 1024)) } // 10MB cache if set
-                connectTimeout(30.seconds)
-                readTimeout(30.seconds )
-                writeTimeout(30.seconds)
-            }.build()
-        }
+        fun defaultOkHttpClient(): OkHttpClient =
+            OkHttpClient
+                .Builder()
+                .apply {
+                    cacheDir?.let { cache(Cache(it, 10L * 1024 * 1024)) } // 10MB cache if set
+                    connectTimeout(30.seconds)
+                    readTimeout(30.seconds)
+                    writeTimeout(30.seconds)
+                }.build()
 
         private fun authInterceptor(chain: Interceptor.Chain): Response {
             val original = chain.request()
-            val builder = original.newBuilder()
-                .method(original.method, original.body)
-                .header("X-SDK-Variant", "android")
-                .header("X-Shopify-Storefront-Access-Token", accessToken)
+            val builder =
+                original
+                    .newBuilder()
+                    .method(original.method, original.body)
+                    .header("X-SDK-Variant", "android")
+                    .header("X-Shopify-Storefront-Access-Token", accessToken)
             return chain.proceed(builder.build())
         }
 
@@ -177,17 +199,21 @@ class GraphClient private constructor(
 
         fun build(): GraphClient {
             // Use custom httpClient if provided, otherwise default one
-            val okHttpClient = (httpClient ?: defaultOkHttpClient()).newBuilder().apply {
-                addInterceptor(::retryInterceptor)  // Ensure retryInterceptor is added in custom client
-                addInterceptor(::authInterceptor)  // Ensure authInterceptor is added in custom client
-            }.build()
-            val serverUrl = HttpUrl.Builder()
-                .scheme("https")
-                .host(shopDomain)
-                .addPathSegments("api/$apiVersion/graphql")
-                .build()
+            val okHttpClient =
+                (httpClient ?: defaultOkHttpClient())
+                    .newBuilder()
+                    .apply {
+                        addInterceptor(::retryInterceptor) // Ensure retryInterceptor is added in custom client
+                        addInterceptor(::authInterceptor) // Ensure authInterceptor is added in custom client
+                    }.build()
+            val serverUrl =
+                HttpUrl
+                    .Builder()
+                    .scheme("https")
+                    .host(shopDomain)
+                    .addPathSegments("api/$apiVersion/graphql")
+                    .build()
             return GraphClient(serverUrl, okHttpClient)
         }
     }
 }
-

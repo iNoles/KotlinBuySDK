@@ -12,18 +12,18 @@ private const val ACCESS_TOKEN = "access_token"
 private val ENDPOINT_URL = "https://$SHOP_DOMAIN/api/2025-01/graphql".toHttpUrl()
 
 class GraphClientBuilderTest {
-
     @Test
     fun buildSuccessWithCustomOkHttpClient() {
         val okHttpClient = OkHttpClient.Builder().build()
 
-        val graphClient = GraphClient.Builder(
-            shopDomain = SHOP_DOMAIN,
-            accessToken = ACCESS_TOKEN,
-            apiVersion = "2025-01"
-        )
-            .httpClient(okHttpClient)
-            .build()
+        val graphClient =
+            GraphClient
+                .Builder(
+                    shopDomain = SHOP_DOMAIN,
+                    accessToken = ACCESS_TOKEN,
+                    apiVersion = "2025-01",
+                ).httpClient(okHttpClient)
+                .build()
         with(graphClient) {
             assertEquals(ENDPOINT_URL, serverUrl)
             assertNotNull(httpCallFactory)
@@ -33,11 +33,13 @@ class GraphClientBuilderTest {
 
     @Test
     fun buildSuccessWithDefaultClient() {
-        val graphClient = GraphClient.Builder(
-            shopDomain = SHOP_DOMAIN,
-            accessToken = ACCESS_TOKEN,
-            apiVersion = "2025-01"
-        ).build()
+        val graphClient =
+            GraphClient
+                .Builder(
+                    shopDomain = SHOP_DOMAIN,
+                    accessToken = ACCESS_TOKEN,
+                    apiVersion = "2025-01",
+                ).build()
         with(graphClient) {
             assertEquals(ENDPOINT_URL, serverUrl)
             assertNotNull(httpCallFactory)
