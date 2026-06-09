@@ -53,7 +53,7 @@ android {
 }*/
 
 dependencies {
-    implementation(platform("com.squareup.okhttp3:okhttp-bom:5.3.2"))
+    implementation(platform("com.squareup.okhttp3:okhttp-bom:5.4.0"))
     implementation("com.squareup.okhttp3:okhttp")
     implementation("com.squareup.okhttp3:okhttp-coroutines")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
@@ -61,5 +61,5 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.8.0-0.6.x-compat")
 
     testImplementation("junit:junit:4.13.2")
-    testImplementation("com.squareup.okhttp3:mockwebserver3-junit4:5.3.2")
+    testImplementation("com.squareup.okhttp3:mockwebserver3-junit4:5.4.0")
 }
