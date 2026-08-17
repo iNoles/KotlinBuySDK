@@ -61,5 +61,5 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.8.0-0.6.x-compat")
 
     testImplementation("junit:junit:4.13.2")
-    testImplementation("com.squareup.okhttp3:mockwebserver3-junit4:5.4.0")
+    testImplementation("com.squareup.okhttp3:mockwebserver3-junit4:5.5.0")
 }
